@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>jd3-revisions-base-core</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
     <description>${project.parent.artifactId} - ${project.artifactId}</description>
