@@ -5,11 +5,11 @@
 
     <parent>
         <groupId>eu.europa.ec.joinup.sat</groupId>
-        <artifactId>jd3-revisions-base</artifactId>
+        <artifactId>jdplus-revisions-base</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jd3-revisions-base-parent</artifactId>
+    <artifactId>jdplus-revisions-base-parent</artifactId>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
@@ -17,9 +17,9 @@
     <url>${project.parent.url}</url>
 
     <modules>
-        <module>jd3-revisions-base-api</module>
-        <module>jd3-revisions-base-core</module>
-        <module>jd3-revisions-base-io</module>
-        <module>jd3-revisions-base-r</module>
+        <module>jdplus-revisions-base-api</module>
+        <module>jdplus-revisions-base-core</module>
+        <module>jdplus-revisions-base-io</module>
+        <module>jdplus-revisions-base-r</module>
     </modules>
 </project>

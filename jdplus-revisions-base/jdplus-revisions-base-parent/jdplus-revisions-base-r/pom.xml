@@ -5,11 +5,11 @@
 
     <parent>
         <groupId>eu.europa.ec.joinup.sat</groupId>
-        <artifactId>jd3-revisions-base-parent</artifactId>
+        <artifactId>jdplus-revisions-base-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jd3-revisions-base-r</artifactId>
+    <artifactId>jdplus-revisions-base-r</artifactId>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
@@ -18,32 +18,32 @@
 
     <properties>
         <demetra.version>3.0.0-SNAPSHOT</demetra.version>
-        <jd3-toolkit.version>1.0.0-SNAPSHOT</jd3-toolkit.version>
+        <jdplus-toolkit.version>1.0.0-SNAPSHOT</jdplus-toolkit.version>
     </properties>
 
     <dependencies>
         <!-- compile and runtime -->
         <dependency>
             <groupId>eu.europa.ec.joinup.sat</groupId>
-            <artifactId>jd3-toolkit-base-r</artifactId>
-            <version>${jd3-main.version}</version>
+            <artifactId>jdplus-toolkit-base-r</artifactId>
+            <version>${jdplus-main.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.joinup.sat</groupId>
-            <artifactId>jd3-revisions-base-api</artifactId>
+            <artifactId>jdplus-revisions-base-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.joinup.sat</groupId>
-            <artifactId>jd3-revisions-base-core</artifactId>
+            <artifactId>jdplus-revisions-base-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <!-- test only -->
         <dependency>
             <groupId>eu.europa.ec.joinup.sat</groupId>
-            <artifactId>jd3-toolkit-base-api</artifactId>
-            <version>${jd3-main.version}</version>
+            <artifactId>jdplus-toolkit-base-api</artifactId>
+            <version>${jdplus-main.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>

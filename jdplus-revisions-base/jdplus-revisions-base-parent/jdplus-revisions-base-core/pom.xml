@@ -5,11 +5,11 @@
 
     <parent>
         <groupId>eu.europa.ec.joinup.sat</groupId>
-        <artifactId>jd3-revisions-base-parent</artifactId>
+        <artifactId>jdplus-revisions-base-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jd3-revisions-base-io</artifactId>
+    <artifactId>jdplus-revisions-base-core</artifactId>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
@@ -20,22 +20,28 @@
         <!-- compile and runtime -->
         <dependency>
             <groupId>eu.europa.ec.joinup.sat</groupId>
-            <artifactId>jd3-toolkit-base-api</artifactId>
-            <version>${jd3-main.version}</version>
+            <artifactId>jdplus-revisions-base-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.europa.ec.joinup.sat</groupId>
-            <artifactId>jd3-revisions-base-api</artifactId>
-            <version>${project.version}</version>
+            <artifactId>jdplus-toolkit-base-core</artifactId>
+            <version>${jdplus-main.version}</version>
         </dependency>
 
         <!-- test only -->
         <dependency>
             <groupId>eu.europa.ec.joinup.sat</groupId>
-            <artifactId>jd3-toolkit-base-api</artifactId>
-            <version>${jd3-main.version}</version>
+            <artifactId>jdplus-toolkit-base-api</artifactId>
+            <version>${jdplus-main.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.joinup.sat</groupId>
+            <artifactId>demetra-tstoolkit</artifactId>
+            <version>${jd2.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
