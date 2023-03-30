@@ -9,5 +9,5 @@ module jdplus.revisions.base.core {
     requires jdplus.toolkit.base.api;
     requires jdplus.toolkit.base.core;
 
-    exports jdplus.revisions.parametric;
+    exports jdplus.revisions.base.core.parametric;
 }

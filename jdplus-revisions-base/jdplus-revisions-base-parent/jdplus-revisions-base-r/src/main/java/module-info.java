@@ -10,5 +10,5 @@ module jdplus.revisions.base.r {
     requires jdplus.revisions.base.core;
     requires jdplus.toolkit.base.core;
 
-    exports demetra.revisions.r;
+    exports jdplus.revisions.base.r;
 }
