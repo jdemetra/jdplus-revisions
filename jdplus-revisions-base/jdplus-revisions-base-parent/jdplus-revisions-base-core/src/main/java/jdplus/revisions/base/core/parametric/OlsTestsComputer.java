@@ -98,7 +98,7 @@ public class OlsTestsComputer {
                 StatisticalTest t = lsr.Ttest(i);
                 c[i] = new Coefficient(coef.get(i), Math.sqrt(diag.get(i)), t.getValue(), t.getPvalue());
             };
-
+            
             builder.R2(lsr.getR2())
                     .F(lsr.Ftest().getValue())
                     .n(lm.getObservationsCount())
@@ -110,5 +110,4 @@ public class OlsTestsComputer {
 
         return builder.build();
     }
-
 }

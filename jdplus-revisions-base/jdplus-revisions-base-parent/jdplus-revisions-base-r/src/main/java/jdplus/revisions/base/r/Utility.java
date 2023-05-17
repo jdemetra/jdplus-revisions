@@ -16,29 +16,35 @@
  */
 package jdplus.revisions.base.r;
 
-import jdplus.toolkit.base.api.data.DoubleSeq;
-import jdplus.toolkit.base.api.data.DoubleSeqCursor;
-import jdplus.toolkit.base.api.data.DoublesMath;
+import java.time.LocalDate;
 import jdplus.revisions.base.api.parametric.AutoCorrelationTests;
 import jdplus.revisions.base.api.parametric.Bias;
 import jdplus.revisions.base.api.parametric.Coefficient;
+import jdplus.toolkit.base.api.data.DoubleSeq;
+import jdplus.toolkit.base.api.data.DoubleSeqCursor;
 import jdplus.revisions.base.api.parametric.OlsTests;
 import jdplus.revisions.base.api.parametric.RegressionBasedAnalysis;
 import jdplus.revisions.base.api.parametric.RevisionAnalysis;
 import jdplus.revisions.base.api.parametric.SignalNoise;
 import jdplus.revisions.base.api.parametric.UnitRoot;
-import jdplus.toolkit.base.api.stats.StatisticalTest;
-import java.time.LocalDate;
-import jdplus.toolkit.base.core.math.matrices.FastMatrix;
 import jdplus.revisions.base.core.parametric.AutoCorrelationTestsComputer;
 import jdplus.revisions.base.core.parametric.BiasComputer;
+import jdplus.toolkit.base.core.math.matrices.FastMatrix;
 import jdplus.revisions.base.core.parametric.OlsTestsComputer;
 import jdplus.revisions.base.core.parametric.SignalNoiseComputer;
-import jdplus.revisions.base.core.parametric.UnitRootTestsComputer;
-import jdplus.toolkit.base.core.stats.tests.JohansenCointegration;
 import jdplus.toolkit.base.core.stats.StatUtility;
-import jdplus.toolkit.base.core.stats.tests.DickeyFuller;
 import jdplus.toolkit.base.api.math.matrices.Matrix;
+import jdplus.revisions.base.core.treatment.PreTreatment;
+import jdplus.revisions.base.core.parametric.Theil2;
+import jdplus.revisions.base.core.parametric.UnitRootTestsComputer;
+import jdplus.toolkit.base.api.data.DoublesMath;
+import jdplus.toolkit.base.api.dstats.ContinuousDistribution;
+import jdplus.toolkit.base.api.stats.StatisticalTest;
+import jdplus.toolkit.base.api.stats.TestType;
+import jdplus.toolkit.base.core.dstats.T;
+import jdplus.toolkit.base.core.stats.tests.DickeyFuller;
+import jdplus.toolkit.base.core.stats.tests.JohansenCointegration;
+import jdplus.toolkit.base.core.stats.tests.TestsUtility;
 
 /**
  *
@@ -64,11 +70,43 @@ public class Utility {
         }
         double[] u = new double[n];
         for (int i = 0; i < n; ++i) {
-            u[i] = StatUtility.theilInequalityCoefficient(vintages.column(i + gap), vintages.column(i));
+            DoubleSeq a = vintages.column(i + gap);
+            DoubleSeq b = vintages.column(i);
+            Matrix mc = PreTreatment.cleanNaN(a, b);
+            u[i] = StatUtility.theilInequalityCoefficient(mc.column(0), mc.column(1));
         }
         return u;
     }
 
+    /**
+     * Theil2 coefficients computed on the columns of the vintages matrix
+     *
+     * @author clemasso
+     *
+     * @param vintages Vintages
+     * @param gap Delay between the compared vintages (should be &ge 1)
+     * @return
+     */
+    public double[] theil2(Matrix vintages, int gap) {
+        if (gap < 1) {
+            throw new IllegalArgumentException("gap should be >= 1");
+        }
+        int n = vintages.getColumnsCount() - gap;
+        if (n <= 0) {
+            return null;
+        }
+        double[] u = new double[n];
+        for (int i = 0; i < n; ++i) {
+            DoubleSeq a = vintages.column(i + gap);
+            DoubleSeq b = vintages.column(i);
+            Matrix mc = PreTreatment.cleanNaN(a, b);
+            u[i] = Theil2.U2(mc.column(0), mc.column(1));
+        }
+        return u;
+    }
+
+    // apply it for other methods
+    // use the modified code in R
     private final int OLS = 16, C = 3;
 
     /**
@@ -89,10 +127,24 @@ public class Utility {
         FastMatrix rslt = FastMatrix.make(n, OLS + 2 * C);
 
         for (int i = 0; i < n; ++i) {
+            DoubleSeq y = vintages.column(i + gap);
+            DoubleSeq x = vintages.column(i);
+            Matrix yxCorr = PreTreatment.cleanNaN(y, x);
             DoubleSeqCursor.OnMutable cursor = rslt.row(i).cursor();
-            OlsTests test = OlsTestsComputer.of(vintages.column(i + gap), vintages.column(i));
+            OlsTests test = OlsTestsComputer.of(yxCorr.column(0), yxCorr.column(1));
             olsInformation(test, cursor);
+            
+            // Test beta1=1 instead of beta1=0
+            double N = rslt.get(i, 0);
+            int nx = 2;
+            double slopeEst = rslt.get(i, 6);
+            double slopeStdErr = rslt.get(i, 7);
+            double t1 = (slopeEst-1)/slopeStdErr;
+            T tdist = new T(N-nx);
+            double pvalT1 = TestsUtility.pvalue(tdist, t1, TestType.TwoSided);
+            rslt.set(i, 8, pvalT1);
         }
+        
         return rslt;
     }
 
@@ -113,8 +165,11 @@ public class Utility {
         for (int i = 0, k = 0; i < n; ++i) {
             for (int j = i + 1; j < n; ++j) {
                 try {
+                    DoubleSeq y = vintages.column(i);
+                    DoubleSeq x = vintages.column(j);
+                    Matrix yxCorr = PreTreatment.cleanNaN(y, x);
                     DoubleSeqCursor.OnMutable cursor = rslt.row(k++).cursor();
-                    AutoCorrelationTests test = AutoCorrelationTestsComputer.of(vintages.column(i), vintages.column(j), nbg, nlb);
+                    AutoCorrelationTests test = AutoCorrelationTestsComputer.of(yxCorr.column(0), yxCorr.column(1), nbg, nlb);
                     acInformation(test, cursor);
                 } catch (Exception err) {
                 }
@@ -139,8 +194,12 @@ public class Utility {
         for (int i = 0, k = 0; i < n; ++i) {
             for (int j = i + 1; j < n; ++j) {
                 try {
+                    DoubleSeq x = vintages.column(i);
+                    DoubleSeq y = vintages.column(j);
+                    Matrix xyCorr = PreTreatment.cleanNaN(x, y);
+
                     DoubleSeqCursor.OnMutable cursor = rslt.row(k++).cursor();
-                    DickeyFuller df = DickeyFuller.engleGranger(vintages.column(j), vintages.column(i))
+                    DickeyFuller df = DickeyFuller.engleGranger(xyCorr.column(1), xyCorr.column(0))
                             .numberOfLags(adfk).build();
                     if (df != null) {
                         cursor.setAndNext(df.getRho());
@@ -173,11 +232,15 @@ public class Utility {
                 .errorCorrectionModel(ecdet)
                 .lag(lag)
                 .build();
-        FastMatrix M = FastMatrix.make(vintages.getRowsCount(), 2);
-        for (int i = 0, k = 0; i < n; ++i) {
-            M.column(0).copy(vintages.column(i));
+        
+        for (int i = 0, k = 0; i < n; ++i) { 
             for (int j = i + 1; j < n; ++j) {
-                M.column(1).copy(vintages.column(j));
+                DoubleSeq vi = vintages.column(i);
+                DoubleSeq vj = vintages.column(j);
+                Matrix vijCorr = PreTreatment.cleanNaN(vi, vj);  
+                FastMatrix M = FastMatrix.make(vijCorr.getRowsCount(), 2);
+                M.column(0).copy(vijCorr.column(0));
+                M.column(1).copy(vijCorr.column(1));
                 try {
                     DoubleSeqCursor.OnMutable cursor = rslt.row(k++).cursor();
                     computer.process(M, null);
@@ -197,11 +260,8 @@ public class Utility {
     private final int UR = 4 * 4;
 
     /**
-     * Computes unit roots tests.
-     * The tests are givenin the following order:
-     * Dickey-Fuller
-     * Augmented Dickey-Fuller
-     * Dickey-Fuller with c and trend
+     * Computes unit roots tests. The tests are givenin the following order:
+     * Dickey-Fuller Augmented Dickey-Fuller Dickey-Fuller with c and trend
      * Philips-Perron
      *
      * @param vintages
@@ -215,11 +275,10 @@ public class Utility {
         for (int i = 0, k = 0; i < n; ++i) {
             try {
                 DoubleSeqCursor.OnMutable cursor = rslt.row(k++).cursor();
-                UnitRoot ur = UnitRootTestsComputer.of(vintages.column(i), adfk);
+                UnitRoot ur = UnitRootTestsComputer.of(PreTreatment.cleanNaN(vintages.column(i)), adfk);
                 urInformation(ur, cursor);
             } catch (Exception err) {
             }
-
         }
         return rslt;
     }
@@ -242,9 +301,13 @@ public class Utility {
         FastMatrix rslt = FastMatrix.make(n, OLS + 2 * C);
 
         for (int i = 0; i < n; ++i) {
-            DoubleSeq prev = vintages.column(i), cur = vintages.column(i + gap);
+            
+            DoubleSeq x = vintages.column(i);
+            DoubleSeq y = DoublesMath.subtract(vintages.column(i + gap), x);
+            Matrix yxCorr = PreTreatment.cleanNaN(y, x);
+            
             DoubleSeqCursor.OnMutable cursor = rslt.row(i).cursor();
-            OlsTests test = OlsTestsComputer.of(DoublesMath.subtract(cur, prev), prev);
+            OlsTests test = OlsTestsComputer.of(yxCorr.column(0), yxCorr.column(1));
             olsInformation(test, cursor);
         }
         return rslt;
@@ -264,8 +327,11 @@ public class Utility {
         for (int i = 0; i < n; ++i) {
             DoubleSeqCursor.OnMutable cursor = rslt.row(i).cursor();
             try {
-                OlsTests test = OlsTestsComputer.of(DoublesMath.subtract(vintages.column(i + gap + 1), vintages.column(i + 1)),
-                        DoublesMath.subtract(vintages.column(i + gap), vintages.column(i)));
+                DoubleSeq y = DoublesMath.subtract(vintages.column(i + gap + 1), vintages.column(i + 1));
+                DoubleSeq x = DoublesMath.subtract(vintages.column(i + gap), vintages.column(i));
+                Matrix yxCorr = PreTreatment.cleanNaN(y, x);
+                
+                OlsTests test = OlsTestsComputer.of(yxCorr.column(0), yxCorr.column(1));
                 olsInformation(test, cursor);
             } catch (Exception err) {
             }
@@ -281,44 +347,58 @@ public class Utility {
      * @return
      */
     public Matrix orthogonallyModel1(Matrix revs, int nrevs) {
-        int n = revs.getColumnsCount();
-        if (nrevs >= n) {
+        int nr = revs.getRowsCount();
+        int nc = revs.getColumnsCount();
+        if (nrevs >= nc) {
             return null;
         }
-        FastMatrix rslt = FastMatrix.make(n - nrevs, OLS + C * (1 + nrevs));
+        FastMatrix rslt = FastMatrix.make(nc - nrevs, OLS + C * (1 + nrevs));
         DoubleSeq[] x = new DoubleSeq[nrevs];
-        for (int i = nrevs; i < n; ++i) {
+        for (int i = nrevs; i < nc; ++i) {
+            double[] yx = new double[nr * (nrevs + 1)];
+            double[] y = revs.column(i).toArray();
+            System.arraycopy(y, 0, yx, 0, y.length);
+
             for (int j = 0; j < nrevs; ++j) {
                 x[j] = revs.column(i - j - 1);
+                System.arraycopy(x[j].toArray(), 0, yx, (j + 1) * nr, x[j].toArray().length);
             }
+
+            Matrix yxCorr = PreTreatment.cleanNaN(Matrix.of(yx, nr, nrevs + 1));
+
+            DoubleSeq yc = yxCorr.column(0);
+            DoubleSeq[] xc = new DoubleSeq[nrevs];
+            for (int k = 0; k < nrevs; ++k) {
+                xc[k] = yxCorr.column(k + 1);
+            }
+
             DoubleSeqCursor.OnMutable cursor = rslt.row(i - nrevs).cursor();
             try {
-                OlsTests test = OlsTestsComputer.of(revs.column(i), x);
+                OlsTests test = OlsTestsComputer.of(yc, xc);
                 olsInformation(test, cursor);
             } catch (Exception err) {
             }
         }
         return rslt;
     }
-
-    /**
-     *
-     * @param revs
-     * @param ref
-     * @return
-     */
-    public Matrix orthogonallyModel2(Matrix revs, int ref) {
+    
+    public Matrix orthogonallyModel2(Matrix revs, int k) {
         int n = revs.getColumnsCount();
-        if (ref >= n || ref < 1) {
+        if (k >= n || k < 1) {
             return null;
         }
-        FastMatrix rslt = FastMatrix.make(n - 1, OLS + C * 2);
-        DoubleSeq cref = revs.column(ref - 1);
+        FastMatrix rslt = FastMatrix.make(n - k, OLS + C * 2);
+
         for (int i = 0, j = 0; i < n; ++i) {
-            if (i != ref - 1) {
+            if (i > k - 1) {
+
+                DoubleSeq y = revs.column(i);
+                DoubleSeq x = revs.column(i - k);
+                Matrix yxCorr = PreTreatment.cleanNaN(y, x);
+
                 DoubleSeqCursor.OnMutable cursor = rslt.row(j++).cursor();
                 try {
-                    OlsTests test = OlsTestsComputer.of(revs.column(i), cref);
+                    OlsTests test = OlsTestsComputer.of(yxCorr.column(0), yxCorr.column(1));
                     olsInformation(test, cursor);
                 } catch (Exception err) {
                 }
@@ -369,8 +449,12 @@ public class Utility {
         FastMatrix rslt = FastMatrix.make(n, SN);
 
         for (int i = 0; i < n; ++i) {
+            DoubleSeq L = vintages.column(i + gap);
+            DoubleSeq P = vintages.column(i);
+            Matrix LPCorr = PreTreatment.cleanNaN(L, P);
+
             DoubleSeqCursor.OnMutable cursor = rslt.row(i).cursor();
-            SignalNoise test = SignalNoiseComputer.of(vintages.column(i), vintages.column(i + gap));
+            SignalNoise test = SignalNoiseComputer.of(LPCorr.column(1), LPCorr.column(0));
             signalNoiseInformation(test, cursor);
         }
         return rslt;
@@ -497,5 +581,7 @@ public class Utility {
         cursor.setAndNext(sn.getNoiseF());
         cursor.setAndNext(sn.getNoisePvalue());
     }
-
+    
+    
+    
 }
