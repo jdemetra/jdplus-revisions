@@ -26,11 +26,11 @@ public class PreTreatmentTest {
         double[] dataInput = {1.1,1.2,1.3,1.4,1.5,1.6,Double.NaN,
                               2.1,2.2,2.3,2.4,2.5,2.6,2.7,
                               3.1,3.2,Double.NaN,3.4,3.5,Double.NaN,Double.NaN};
-        Matrix mInput = Matrix.of(dataInput, 7, 1);
+        Matrix mInput = Matrix.of(dataInput, 7, 3);
         double[] dataOutput = {1.1,1.2,1.4,1.5,
                                2.1,2.2,2.4,2.5,
                                3.1,3.2,3.4,3.5};
-        Matrix mOutput = Matrix.of(dataOutput, 4, 1);
+        Matrix mOutput = Matrix.of(dataOutput, 4, 3);
         
         assertThat(PreTreatment.cleanNaN(mInput))
                 .isEqualTo(mOutput);
