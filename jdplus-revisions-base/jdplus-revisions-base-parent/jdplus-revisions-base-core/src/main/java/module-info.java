@@ -10,4 +10,5 @@ module jdplus.revisions.base.core {
     requires jdplus.toolkit.base.core;
 
     exports jdplus.revisions.base.core.parametric;
+    exports jdplus.revisions.base.core.treatment;
 }
