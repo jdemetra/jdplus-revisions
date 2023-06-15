@@ -23,6 +23,7 @@ import jdplus.toolkit.base.api.timeseries.TsPeriod;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
+import jdplus.toolkit.base.api.math.matrices.Matrix;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
@@ -97,4 +98,18 @@ public class UtilityTest {
         }
         return builder.build();
     }
+    
+    public Matrix testOrthogonality1() {
+        
+       double[] data2 = {1.0,2.0,Double.NaN,4.0,5.0,6.0,7.0,8.0,
+                          1.0,2.2,3.5,Double.NaN,5.1,6.1,7.1,8.2,
+                          1.1,2.0,3.0,4.6,5.1,6.1,7.3,8.3,
+                          1.0,2.0,3.5,4.6,5.1,6.2,7.5,Double.NaN,
+                          1.0,2.0,3.6,4.7,5.1,6.2,7.5,8.4};
+        Matrix m2 = Matrix.of(data2, 8, 5);
+        
+        final Matrix rslt = Utility.orthogonallyModel1(m2,2);
+        
+        return rslt;
+    }    
 }
