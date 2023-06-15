@@ -21,17 +21,17 @@
         <dependencies>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>jdplus-revisions-base-plugin</artifactId>
+                <artifactId>jdplus-revisions-base</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>jdplus-revisions-cli-plugin</artifactId>
+                <artifactId>jdplus-revisions-cli</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>jdplus-revisions-desktop-plugin</artifactId>
+                <artifactId>jdplus-revisions-desktop</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
