@@ -7,6 +7,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- ![OTHER] Migrate OSSRH to Central Portal
+
 ## [1.1.0] - 2023-06-15
 
 ### Added
