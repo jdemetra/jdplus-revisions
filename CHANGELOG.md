@@ -10,6 +10,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - ![OTHER] Migrate OSSRH to Central Portal
+- ![OTHER] Migrate protobuf-maven-plugin from org.xolstice.maven.plugins to io.github.ascopes
 
 ## [1.1.0] - 2023-06-15
 
