@@ -3,7 +3,7 @@ module jdplus.revisions.base.core {
     requires static lombok;
     requires static nbbrd.design;
     requires static nbbrd.service;
-    requires static org.checkerframework.checker.qual;
+    requires static org.jspecify;
 
     requires transitive jdplus.revisions.base.api;
     requires jdplus.toolkit.base.api;
