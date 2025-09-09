@@ -24,7 +24,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
 import jdplus.toolkit.base.api.math.matrices.Matrix;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -56,7 +57,7 @@ public class UtilityTest {
         LocalDate t1=LocalDate.of(2020, 1, 1);
         Vintages V=new Vintages(v);
         TsMatrix vtable = V.vtable(3, 136, t0.format(DateTimeFormatter.ISO_DATE), t1.format(DateTimeFormatter.ISO_DATE));
-        assertTrue(vtable.getMatrix().getRowsCount() == 134);
+        assertEquals(134, vtable.getMatrix().getRowsCount());
 //        System.out.println(vtable.getMatrix());
     }
 
