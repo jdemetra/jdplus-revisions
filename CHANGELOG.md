@@ -31,8 +31,7 @@ This is the **initial release** of revisions extensions for JDemetra+ v3.
 [Unreleased]: https://github.com/jdemetra/jdplus-revisions/compare/v1.1.0...HEAD
 [1.1.0]: https://github.com/jdemetra/jdplus-revisions/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/jdemetra/jdplus-revisions/releases/tag/v1.0.0
-
-[STAT]: https://img.shields.io/badge/-STAT-068C09
-[OTHER]: https://img.shields.io/badge/-OTHER-e4e669
 [IO]: https://img.shields.io/badge/-IO-F813F7
+[OTHER]: https://img.shields.io/badge/-OTHER-e4e669
+[STAT]: https://img.shields.io/badge/-STAT-068C09
 [UI]: https://img.shields.io/badge/-UI-5319E7
